@@ -25,7 +25,7 @@ int lgetl(uint32_t *lp, FILE* f)		/* returns -1 for failure, 0 for success */
 		return (ERROR);
 	}
 
-#if defined(__msvc__)	
+#if defined(_MSC_VER)	
 	*lp = _byteswap_ulong(*lp);
 #else
 	*lp = __builtin_bswap32(*lp);
@@ -40,7 +40,7 @@ int lgetw(uint16_t* lp, FILE* f)		/* returns -1 for failure, 0 for success */
 		return (ERROR);
 	}
 
-#if defined(__msvc__)	
+#if defined(_MSC_VER)	
 	*lp = _byteswap_ushort(*lp);
 #else
 	*lp = __builtin_bswap16(*lp);
@@ -65,7 +65,7 @@ uint32_t _lgetl(FILE* fp)
 		return EOF;
 	}
 
-#if defined(__msvc__)	
+#if defined(_MSC_VER)	
 	return _byteswap_ulong(uValue);
 #else
 	return __builtin_bswap32(uValue);
@@ -79,7 +79,7 @@ uint16_t _lgetw(FILE* fp)
 		return EOF;
 	}
 
-#if defined(__msvc__)	
+#if defined(_MSC_VER)	
 	return _byteswap_ushort(uValue);
 #else
 	return __builtin_bswap16(uValue);

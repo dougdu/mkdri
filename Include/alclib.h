@@ -2,13 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#if defined(__msvc__)
+#if defined(_MSC_VER)
 #include <io.h>
+#include <sys\stat.h>
+#else
+#include <unistd.h>
+#define _read read
+#define _write write
 #endif
 #include <fcntl.h>
-#if defined(__msvc__)
-#include <sys\stat.h>
-#endif
 #include <stdtypes.h>
 #include <cout.h>
 #include <ar68.h>

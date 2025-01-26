@@ -20,7 +20,7 @@
 
 int lputl(uint32_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 {
-#if defined(__msvc__)
+#if defined(_MSC_VER)
 	uint32_t uValue = _byteswap_ulong(*lp);
 #else
 	uint32_t uValue = __builtin_bswap32(*lp);
@@ -39,7 +39,7 @@ int lputl(uint32_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 
 int lputw(uint16_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 {
-#if defined(__msvc__)
+#if defined(_MSC_VER)
 	uint16_t uValue = _byteswap_ushort(*lp);
 #else
 	uint16_t uValue = __builtin_bswap16(*lp);

@@ -9,19 +9,15 @@
 */
 
 #include <alclib.h>
-#include <stdint.h>
-#include <unistd.h>
-
-
 
 int lreadl(int fd, uint32_t* str)
 {
 	uint32_t junk;
 
-	if (read(fd, &junk, sizeof(junk)) != sizeof(junk)) {
+	if (_read(fd, &junk, sizeof(junk)) != sizeof(junk)) {
 		return(ERROR);
 	}
-#if defined(__msvc__)
+#if defined(_MSC_VER)
 	*str = _byteswap_ulong(junk);
 #else
 	*str = __builtin_bswap32(junk);
@@ -37,7 +33,7 @@ int lreadw(int fd, uint16_t* str)
 	if (_read(fd, &junk, sizeof(junk)) != sizeof(junk)) {
 		return(ERROR);
 	}
-#if defined(__msvc__)
+#if defined(_MSC_VER)
 	*str = _byteswap_ushort(junk);
 #else
 	*str = __builtin_bswap16(junk);
