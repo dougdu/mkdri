@@ -8,51 +8,52 @@
 	@(#) sys/cout.h - Jul 26, 1983  REGULUS 4.1
 */
 
+#include <stdint.h>
 
 #pragma pack(push)
 #pragma pack(2)
 
 typedef struct hdr {
-	unsigned __int16 ch_magic;
-	unsigned __int32 ch_tsize;		/* text size */
-	unsigned __int32 ch_dsize;		/* data size */
-	unsigned __int32 ch_bsize;		/* bss size */
-	unsigned __int32 ch_ssize;		/* symbol table size */
-	unsigned __int32 ch_stksize;	/* stack size */
-	unsigned __int32 ch_entry;		/* location of entry point */
-	unsigned __int16 ch_rlbflg;	    /* relocation bits present flag, must be signed */
+	uint16_t ch_magic;
+	uint32_t ch_tsize;		/* text size */
+	uint32_t ch_dsize;		/* data size */
+	uint32_t ch_bsize;		/* bss size */
+	uint32_t ch_ssize;		/* symbol table size */
+	uint32_t ch_stksize;	/* stack size */
+	uint32_t ch_entry;		/* location of entry point */
+	uint16_t ch_rlbflg;	    /* relocation bits present flag, must be signed */
 } HDR;
 
 typedef struct hdr_cout {
-	unsigned __int16 ftype;
-	unsigned __int32 ftext;		/* text size */
-	unsigned __int32 fdata;		/* data size */
-	unsigned __int32 fbss;		/* bss size */
-	unsigned __int32 fsym;		/* symbol table size */
-	unsigned __int32 fssize;	/* stack size */
-	unsigned __int32 fentry;	/* location of entry point */
+	uint16_t ftype;
+	uint32_t ftext;		/* text size */
+	uint32_t fdata;		/* data size */
+	uint32_t fbss;		/* bss size */
+	uint32_t fsym;		/* symbol table size */
+	uint32_t fssize;	/* stack size */
+	uint32_t fentry;	/* location of entry point */
 	short			 fflag;	    /* relocation bits present flag, must be signed */
 } HDR_COUT;
 
 typedef struct hdr2 {
-	unsigned __int16 ch_magic;
-	unsigned __int32 ch_tsize;		/* # bytes in program text segment */
-	unsigned __int32 ch_dsize;		/* # bytes in program data segment */
-	unsigned __int32 ch_bsize;		/* # bytes in program bss  segment */
-	unsigned __int32 ch_ssize;		/* # bytes in symbol table */
-	unsigned __int32 ch_stksize;	/* initial stack size */
-	unsigned __int32 ch_entry;		/* entry point--address of text segment */
-	unsigned __int16 ch_rlbflg;		/* relocation bits suppressed flag, must be signed */
-	unsigned __int32 ch_dstart;		/* address of data segment */
-	unsigned __int32 ch_bstart;		/* address of bss segment */
+	uint16_t ch_magic;
+	uint32_t ch_tsize;		/* # bytes in program text segment */
+	uint32_t ch_dsize;		/* # bytes in program data segment */
+	uint32_t ch_bsize;		/* # bytes in program bss  segment */
+	uint32_t ch_ssize;		/* # bytes in symbol table */
+	uint32_t ch_stksize;	/* initial stack size */
+	uint32_t ch_entry;		/* entry point--address of text segment */
+	uint16_t ch_rlbflg;		/* relocation bits suppressed flag, must be signed */
+	uint32_t ch_dstart;		/* address of data segment */
+	uint32_t ch_bstart;		/* address of bss segment */
  } HDR2;
 
 /* structure of the symbol table */
 
 typedef struct nlist {
 	char             n_name[8];
-	unsigned __int16 n_type;
-	unsigned __int32 n_value;
+	uint16_t n_type;
+	uint32_t n_value;
 } NLIST;
 
 /* HDSIZE should be 28 bytes, HDSIZ2 should be 36 bytes */

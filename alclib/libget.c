@@ -14,31 +14,42 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "order.h"
 
 
-int lgetl(unsigned __int32 *lp, FILE* f)		/* returns -1 for failure, 0 for success */
+int lgetl(uint32_t *lp, FILE* f)		/* returns -1 for failure, 0 for success */
 {
-	if (fread(lp, sizeof(unsigned __int32), 1, f) != 1) {
+	if (fread(lp, sizeof(uint32_t), 1, f) != 1) {
 		return (ERROR);
 	}
+
+#if defined(__msvc__)	
 	*lp = _byteswap_ulong(*lp);
+#else
+	*lp = __builtin_bswap32(*lp);
+#endif
 
 	return(SUCCESS);
 }
 
-int lgetw(unsigned __int16* lp, FILE* f)		/* returns -1 for failure, 0 for success */
+int lgetw(uint16_t* lp, FILE* f)		/* returns -1 for failure, 0 for success */
 {
-	if (fread(lp, sizeof(unsigned __int16), 1, f) != 1) {
+	if (fread(lp, sizeof(uint16_t), 1, f) != 1) {
 		return (ERROR);
 	}
+
+#if defined(__msvc__)	
 	*lp = _byteswap_ushort(*lp);
+#else
+	*lp = __builtin_bswap16(*lp);
+#endif
 
 	return(SUCCESS);
 }
 
-int lgetb(unsigned __int8* lp, FILE* f)		/* returns -1 for failure, 0 for success */
+int lgetb(uint8_t* lp, FILE* f)		/* returns -1 for failure, 0 for success */
 {
 	if (fread(lp, 1, 1, f) != 1) {
 		return (ERROR);
@@ -47,30 +58,38 @@ int lgetb(unsigned __int8* lp, FILE* f)		/* returns -1 for failure, 0 for succes
 	return(SUCCESS);
 }
 
-unsigned __int32 _lgetl(FILE* fp)
+uint32_t _lgetl(FILE* fp)
 {
-	unsigned __int32 uValue;
-	if (fread(&uValue, sizeof(unsigned __int32), 1, fp) != 1) {
+	uint32_t uValue;
+	if (fread(&uValue, sizeof(uint32_t), 1, fp) != 1) {
 		return EOF;
 	}
 
+#if defined(__msvc__)	
 	return _byteswap_ulong(uValue);
+#else
+	return __builtin_bswap32(uValue);
+#endif
 }
 
-unsigned __int16 _lgetw(FILE* fp)
+uint16_t _lgetw(FILE* fp)
 {
-	unsigned __int16 uValue;
-	if (fread(&uValue, sizeof(unsigned __int16), 1, fp) != 1) {
+	uint16_t uValue;
+	if (fread(&uValue, sizeof(uint16_t), 1, fp) != 1) {
 		return EOF;
 	}
 
+#if defined(__msvc__)	
 	return _byteswap_ushort(uValue);
+#else
+	return __builtin_bswap16(uValue);
+#endif
 }
 
-unsigned __int8  _lgetb(FILE* fp)
+uint8_t  _lgetb(FILE* fp)
 {
-	unsigned __int8 uValue;
-	if (fread(&uValue, sizeof(unsigned __int8), 1, fp) != 1) {
+	uint8_t uValue;
+	if (fread(&uValue, sizeof(uint8_t), 1, fp) != 1) {
 		return EOF;
 	}
 

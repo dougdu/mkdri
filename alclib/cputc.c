@@ -23,7 +23,7 @@ int cputc(char c, int fn)
 
 	if (fn == 2) {
 		/* Standard Error */
-		retval = _write(fn, &c, 1);
+		retval = fwrite(&c, 1, 1, stderr);
 	}
 	else {
 		retval = putchar(c);

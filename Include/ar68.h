@@ -8,6 +8,8 @@
 	@(#) ar68.h - Jul 26, 1983  REGULUS 4.1
 */
 
+#include <stdint.h>
+
 #pragma pack(push)
 #pragma pack(2)
 
@@ -29,22 +31,22 @@
 
 
 typedef struct libhdr {
-	char			 l1fname[LIB1NSIZE];
-	unsigned __int32 l1modti;
-	char			 l1userid;
-	char			 l1fimode;
-	unsigned __int16 l1fsize;
+	char	 l1fname[LIB1NSIZE];
+	uint32_t l1modti;
+	char	 l1userid;
+	char	 l1fimode;
+	uint16_t l1fsize;
 } LIB1HDR;
 
 
 typedef struct lib2hdr {
-	char			 l2fname[LIBNSIZE];
-	unsigned __int32 l2modti;
-	char			 l2userid;
-	char			 l2gid;
-	unsigned __int16 l2fimode;
-	unsigned __int32 l2fsize;
-	unsigned __int16 l2reserved;
+	char	 l2fname[LIBNSIZE];
+	uint32_t l2modti;
+	char	 l2userid;
+	char	 l2gid;
+	uint16_t l2fimode;
+	uint32_t l2fsize;
+	uint16_t l2reserved;
 } LIB2HDR;
 
 
