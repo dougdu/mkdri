@@ -7,6 +7,8 @@
 #include <sys\stat.h>
 #else
 #include <unistd.h>
+#include <errno.h>
+#include <sys/_types/_errno_t.h>
 #define _read read
 #define _write write
 #endif
@@ -55,3 +57,8 @@ int putarhd(FILE* fp, struct lib2hdr* arptr);
 
 // putchd.cpp
 int putchd(FILE* fp, struct hdr2* arptr);
+
+// fopen_s.c
+#if !defined(_MSC_VER)
+errno_t fopen_s( FILE *restrict *restrict streamptr, const char *restrict filename, const char *restrict mode );
+#endif

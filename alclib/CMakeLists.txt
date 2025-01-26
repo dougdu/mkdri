@@ -9,5 +9,6 @@ set(FILES
   libwrite.c
   putarhd.c
   putchd.c
+  fopen_s.c
   )
   
