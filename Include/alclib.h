@@ -11,6 +11,7 @@
 #include <sys/_types/_errno_t.h>
 #define _read read
 #define _write write
+#define _unlink unlink
 #endif
 #include <fcntl.h>
 #include <stdtypes.h>
@@ -61,4 +62,6 @@ int putchd(FILE* fp, struct hdr2* arptr);
 // fopen_s.c
 #if !defined(_MSC_VER)
 errno_t fopen_s( FILE *restrict *restrict streamptr, const char *restrict filename, const char *restrict mode );
+errno_t strcpy_s( char *restrict dest, size_t destsz, const char *restrict src );
+errno_t _mktemp_s(char *nameTemplate, size_t sizeInChars);
 #endif

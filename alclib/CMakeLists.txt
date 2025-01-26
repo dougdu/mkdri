@@ -10,5 +10,7 @@ set(FILES
   putarhd.c
   putchd.c
   fopen_s.c
+  strcpy_s.c
+  _mktemp_s.c
   )
   
