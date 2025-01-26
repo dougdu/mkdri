@@ -12,9 +12,13 @@
 
 
 
-int lwritel(int fd, unsigned __int32* str)
+int lwritel(int fd, uint32_t* str)
 {
-	unsigned __int32 junk = _byteswap_ulong(*str);
+#if defined(_MSC_VER)
+	uint32_t junk = _byteswap_ulong(*str);
+#else
+	uint32_t junk = __builtin_bswap32(junk);
+#endif
 
 	if (_write(fd, &junk, sizeof(junk)) == sizeof(junk)) {
 		return(SUCCESS);
@@ -23,9 +27,13 @@ int lwritel(int fd, unsigned __int32* str)
 	return(ERROR);
 }
 
-int lwritew(int fd, unsigned __int16* str)
+int lwritew(int fd, uint16_t* str)
 {
-	unsigned __int16 junk = _byteswap_ushort(*str);
+#if defined(_MSC_VER)
+	uint32_t junk = _byteswap_ushort(*str);
+#else
+	uint32_t junk = __builtin_bswap16(junk);
+#endif
 
 	if (_write(fd, &junk, sizeof(junk)) == sizeof(junk)) {
 		return(SUCCESS);
