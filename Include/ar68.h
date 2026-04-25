@@ -21,7 +21,7 @@
 #define LIB1NSIZE	8
 #define LIB1HDSIZE	(sizeof(LIB1HDR))
 
-#define LIB2MAGIC	0xffffff65	// 0xFF65
+#define LIB2MAGIC	0xFF65		// 0xFF65 (matches LIBMAGIC = 0177545)
 #define LIB2HDSIZE	(sizeof(LIB2HDR))
 #define LIB2NSIZE	14
 
