@@ -1,7 +1,6 @@
 #if !defined(_MSC_VER)
 #include <alclib.h>
 #include <errno.h>
-#include <sys/_types/_errno_t.h>
 
 errno_t fopen_s( FILE *restrict *restrict streamptr, const char *restrict filename, const char *restrict mode )
 {
