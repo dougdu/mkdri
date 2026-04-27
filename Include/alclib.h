@@ -1,9 +1,19 @@
 #pragma once
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#if defined(_MSC_VER)
 #include <io.h>
-#include <fcntl.h>
 #include <sys\stat.h>
+#else
+#include <unistd.h>
+#include <errno.h>
+#include <sys/_types/_errno_t.h>
+#define _read read
+#define _write write
+#define _unlink unlink
+#endif
+#include <fcntl.h>
 #include <stdtypes.h>
 #include <cout.h>
 #include <ar68.h>
@@ -18,29 +28,29 @@ int getarhd(FILE* fp, struct lib2hdr* arptr);
 int getchd(FILE* fp, struct hdr2* arptr);
 
 // libget.cpp
-int lgetl(unsigned __int32* lp, FILE* f);
-int lgetw(unsigned __int16* lp, FILE* f);
-int lgetb(unsigned __int8* lp, FILE* f);
-unsigned __int32 _lgetl(FILE* fp);
-unsigned __int16 _lgetw(FILE* fp);
-unsigned __int8  _lgetb(FILE* fp);
+int lgetl(uint32_t* lp, FILE* f);
+int lgetw(uint16_t* lp, FILE* f);
+int lgetb(uint8_t* lp, FILE* f);
+uint32_t _lgetl(FILE* fp);
+uint16_t _lgetw(FILE* fp);
+uint8_t  _lgetb(FILE* fp);
 
 // libput.cpp
-int lputl(unsigned __int32* lp, FILE* f);
-int lputw(unsigned __int16* lp, FILE* f);
-int lputb(unsigned __int8* lp, FILE* f);
-int _lputl(unsigned __int32 uValue, FILE* fp);
-int _lputw(unsigned __int16 uValue, FILE* fp);
-int _lputb(unsigned __int8 uValue, FILE* fp);
+int lputl(uint32_t* lp, FILE* f);
+int lputw(uint16_t* lp, FILE* f);
+int lputb(uint8_t* lp, FILE* f);
+int _lputl(uint32_t uValue, FILE* fp);
+int _lputw(uint16_t uValue, FILE* fp);
+int _lputb(uint8_t uValue, FILE* fp);
 
 // libread.cpp
-int lreadl(int fd, unsigned __int32* str);
-int lreadw(int fd, unsigned __int16* str);
+int lreadl(int fd, uint32_t* str);
+int lreadw(int fd, uint16_t* str);
 int lreadc(int fd, char* str);
 
 // libwrite.cpp
-int lwritel(int fd, unsigned __int32* str);
-int lwritew(int fd, unsigned __int16* str);
+int lwritel(int fd, uint32_t* str);
+int lwritew(int fd, uint16_t* str);
 int lwritec(int fd, char* str);
 
 // putarhd.cpp
@@ -48,3 +58,10 @@ int putarhd(FILE* fp, struct lib2hdr* arptr);
 
 // putchd.cpp
 int putchd(FILE* fp, struct hdr2* arptr);
+
+// fopen_s.c
+#if !defined(_MSC_VER)
+errno_t fopen_s( FILE *restrict *restrict streamptr, const char *restrict filename, const char *restrict mode );
+errno_t strcpy_s(char *strDestination,  size_t numberOfElements,  const char *strSource);
+errno_t _mktemp_s(char *nameTemplate, size_t sizeInChars);
+#endif

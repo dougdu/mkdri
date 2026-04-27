@@ -14,12 +14,17 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "order.h"
 
-int lputl(unsigned __int32* lp, FILE* f)			/* returns 0 for success, -1 for failure */
+int lputl(uint32_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 {
-	unsigned __int32 uValue = _byteswap_ulong(*lp);
+#if defined(_MSC_VER)
+	uint32_t uValue = _byteswap_ulong(*lp);
+#else
+	uint32_t uValue = __builtin_bswap32(*lp);
+#endif
 
 	if (*lp == 0xcdcdcdcd) {
 		printf("Uninitialized data\n");
@@ -32,9 +37,13 @@ int lputl(unsigned __int32* lp, FILE* f)			/* returns 0 for success, -1 for fail
 	return ERROR;
 }
 
-int lputw(unsigned __int16* lp, FILE* f)			/* returns 0 for success, -1 for failure */
+int lputw(uint16_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 {
-	unsigned __int16 uValue = _byteswap_ushort(*lp);
+#if defined(_MSC_VER)
+	uint16_t uValue = _byteswap_ushort(*lp);
+#else
+	uint16_t uValue = __builtin_bswap16(*lp);
+#endif
 
 	if (*lp == 0xcdcd) {
 		printf("Uninitialized data\n");
@@ -47,7 +56,7 @@ int lputw(unsigned __int16* lp, FILE* f)			/* returns 0 for success, -1 for fail
 	return ERROR;
 }
 
-int lputb(unsigned __int8* lp, FILE* f)			/* returns 0 for success, -1 for failure */
+int lputb(uint8_t* lp, FILE* f)			/* returns 0 for success, -1 for failure */
 {
 	if (fwrite(lp, 1, 1, f) == 1) {
 		return SUCCESS;
@@ -56,17 +65,17 @@ int lputb(unsigned __int8* lp, FILE* f)			/* returns 0 for success, -1 for failu
 	return ERROR;
 }
 
-int _lputl(unsigned __int32 uValue, FILE* fp)
+int _lputl(uint32_t uValue, FILE* fp)
 {
 	return lputl(&uValue, fp);
 }
 
-int _lputw(unsigned __int16 uValue, FILE* fp)
+int _lputw(uint16_t uValue, FILE* fp)
 {
 	return lputw(&uValue, fp);
 }
 
-int _lputb(unsigned __int8 uValue, FILE* fp)
+int _lputb(uint8_t uValue, FILE* fp)
 {
 	return lputb(&uValue, fp);
 }
