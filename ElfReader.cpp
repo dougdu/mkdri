@@ -390,10 +390,15 @@ ReadResult readElf(const std::string& path,
     }
 
     // ---------- Section headers ----------
-    // Used (a) to validate section-name → segment mapping for symbols
-    // and (b) to detect any unresolved externals.
-    std::vector<SecId> sectionClass(e_shnum, SecId::Undef);
-    std::vector<std::string> sectionName(e_shnum);
+    // Used (a) to validate section-name → segment mapping for symbols,
+    // (b) to detect any unresolved externals, and (c) to recover the
+    // text/.data boundary when GNU ld fused .text and .data into a
+    // single combined RWX PT_LOAD (see "Combined-PT_LOAD split" below).
+    std::vector<SecId>       sectionClass(e_shnum, SecId::Undef);
+    std::vector<std::string> sectionName (e_shnum);
+    std::vector<uint32_t>    sectionAddr (e_shnum, 0);
+    std::vector<uint32_t>    sectionSize (e_shnum, 0);
+    std::vector<uint32_t>    sectionType_(e_shnum, 0);
     uint32_t shstrOff = 0;
     uint32_t shstrSize = 0;
 
@@ -415,7 +420,8 @@ ReadResult readElf(const std::string& path,
         }
     }
 
-    // First pass: classify every section by its name.
+    // First pass: classify every section by its name and capture
+    // VA/size/type fields used by the combined-PT_LOAD split below.
     for (uint16_t i = 0; i < e_shnum; ++i) {
         size_t shBase = size_t(e_shoff) + size_t(i) * 40;
         if (shBase + 40 > buf.size()) {
@@ -425,8 +431,64 @@ ReadResult readElf(const std::string& path,
         const uint8_t* sh = buf.data() + shBase;
         uint32_t sh_name  = be32(sh + OFF_SH_NAME);
         std::string name = cstrAtOffset(buf, shstrOff, sh_name);
-        sectionName[i] = name;
+        sectionName[i]  = name;
         sectionClass[i] = classifyBySectionName(name);
+        sectionType_[i] = be32(sh + OFF_SH_TYPE);
+        sectionAddr[i]  = be32(sh + OFF_SH_ADDR);
+        sectionSize[i]  = be32(sh + OFF_SH_SIZE);
+    }
+
+    // ---------- Combined-PT_LOAD split ----------
+    // GNU ld with our default linker script emits a single combined
+    // RWX PT_LOAD spanning .text + .data + .bss (and warns
+    // "LOAD segment with RWX permissions").  When that happens the
+    // PT_LOAD walk above stuffs the text *and* data bytes into
+    // out.text, leaving out.data empty — the .68K header would then
+    // report data length = 0, which misleads debuggers like sid68k
+    // and any tool that consumes the DRI section layout.
+    //
+    // CP/M-68K loads text and data contiguously into the TPA, so the
+    // bytes themselves end up in the right places either way, but we
+    // still want the DRI header to faithfully reflect the linked
+    // boundary.  Recover it by finding the .data section (by name,
+    // SHT_PROGBITS, non-zero size) whose linked VA falls inside
+    // out.text's VA range, and splitting the byte vector at that
+    // offset.  bssVA / bssSize were already computed correctly from
+    // the PT_LOAD's (segMemsz - segFilesz) tail, so we leave them
+    // alone.
+    if (out.data.empty() && !out.text.empty()) {
+        const uint32_t textEnd = out.textVA + uint32_t(out.text.size());
+        for (uint16_t i = 0; i < e_shnum; ++i) {
+            const std::string& nm = sectionName[i];
+            const bool isDataName =
+                (nm == ".data" || nm.rfind(".data.", 0) == 0 ||
+                 nm == ".sdata" || nm.rfind(".sdata.", 0) == 0);
+            if (!isDataName) continue;
+            if (sectionType_[i] != SHT_PROGBITS) continue;
+            if (sectionSize[i] == 0) continue;
+            const uint32_t dva = sectionAddr[i];
+            if (dva < out.textVA || dva >= textEnd) continue;
+
+            const uint32_t splitOff = dva - out.textVA;
+            const uint32_t available = uint32_t(out.text.size()) - splitOff;
+            const uint32_t dsize = (sectionSize[i] < available)
+                                       ? sectionSize[i] : available;
+            out.dataVA = dva;
+            out.data.assign(out.text.begin() + splitOff,
+                            out.text.begin() + splitOff + dsize);
+            out.text.resize(splitOff);
+
+            if (opts.verbose) {
+                std::fprintf(stderr,
+                    "mkdri: ELF: split combined RWX PT_LOAD using .data "
+                    "section header (text=0x%X bytes, data=0x%X bytes at "
+                    "VA 0x%08X)\n",
+                    unsigned(out.text.size()),
+                    unsigned(out.data.size()),
+                    unsigned(out.dataVA));
+            }
+            break;
+        }
     }
 
     // Second pass: find .symtab + .strtab and walk it.
