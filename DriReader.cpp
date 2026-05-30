@@ -159,6 +159,74 @@ ReadResult readDri(const std::string& path,
     out.bssVA   = uint32_t(uint64_t(out.dataVA) + effectiveDataLen);
     out.bssSize = ch_bsize + trimmedBytes;
 
+    // ---------- Symbol table (parsed for both pass-through and reloc paths) ----------
+    // DRI/GEMDOS symtab: ch_ssize bytes of fixed 14-byte entries
+    // (8-byte name, 2-byte flags BE, 4-byte value BE).  Flag bits
+    // (octal in sendc68.h) are SYEQ=0x4000, SYGL=0x2000, SYER=0x1000,
+    // SYXR=0x0800 (external ref), SYDA=0x0400, SYTX=0x0200,
+    // SYBS=0x0100.  Values are relative to the input's link base
+    // (ch_entry, typically 0 for lo68 -R output); we bias them so
+    // out.symbols carry final absolute addresses, matching the
+    // SymFile pass-through path which applies zero further bias.
+    {
+        constexpr size_t   OSTSIZE  = 14;
+        constexpr size_t   SYNAMLEN = 8;
+        constexpr uint16_t SYEQ = 0x4000;
+        constexpr uint16_t SYXR = 0x0800;
+        constexpr uint16_t SYDA = 0x0400;
+        constexpr uint16_t SYTX = 0x0200;
+        constexpr uint16_t SYBS = 0x0100;
+        uint64_t symOff = uint64_t(HDR_SZ) + ch_tsize + ch_dsize;
+        if (symOff + ch_ssize > buf.size()) {
+            diag = "DRI symbol table extends past end of file";
+            return ReadResult::UnsupportedFormat;
+        }
+        if (ch_ssize % OSTSIZE != 0) {
+            diag = "DRI ch_ssize (" + std::to_string(ch_ssize) +
+                   ") is not a multiple of " + std::to_string(OSTSIZE);
+            return ReadResult::UnsupportedFormat;
+        }
+        const int64_t symBias = int64_t(opts.targetBase) - int64_t(ch_entry);
+        size_t nSyms = ch_ssize / OSTSIZE;
+        out.symbols.reserve(nSyms);
+        for (size_t i = 0; i < nSyms; ++i) {
+            const uint8_t* e = buf.data() + size_t(symOff) + i * OSTSIZE;
+            std::string name;
+            name.reserve(SYNAMLEN);
+            for (size_t k = 0; k < SYNAMLEN; ++k) {
+                uint8_t c = e[k];
+                if (c == 0) break;
+                name.push_back(char(c));
+            }
+            uint16_t fl = be16(e + SYNAMLEN);
+            uint32_t va = be32(e + SYNAMLEN + 2);
+
+            Symbol s;
+            s.name        = std::move(name);
+            s.isWeak      = false;
+            s.isUndefined = (fl & SYXR) != 0;
+            if (fl & SYTX) {
+                s.section = SecId::Text;
+                s.value   = uint32_t(int64_t(va) + symBias);
+            } else if (fl & SYDA) {
+                s.section = SecId::Data;
+                s.value   = uint32_t(int64_t(va) + symBias);
+            } else if (fl & SYBS) {
+                s.section = SecId::Bss;
+                s.value   = uint32_t(int64_t(va) + symBias);
+            } else if (s.isUndefined) {
+                s.section = SecId::Undef;
+                s.value   = va;
+            } else if (fl & SYEQ) {
+                s.section = SecId::Abs;
+                s.value   = va;
+            } else {
+                continue;
+            }
+            if (!s.name.empty()) out.symbols.push_back(std::move(s));
+        }
+    }
+
     // ---------- Pass-through path for already-absolute inputs ----------
     if (ch_rlbflg != 0) {
         // There are no relocation bits to walk.  Copy verbatim and let
