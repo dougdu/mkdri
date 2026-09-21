@@ -16,6 +16,7 @@
 
 #include "ElfReader.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
@@ -399,6 +400,7 @@ ReadResult readElf(const std::string& path,
     std::vector<uint32_t>    sectionAddr (e_shnum, 0);
     std::vector<uint32_t>    sectionSize (e_shnum, 0);
     std::vector<uint32_t>    sectionType_(e_shnum, 0);
+    std::vector<uint32_t>    sectionFlags(e_shnum, 0);
     uint32_t shstrOff = 0;
     uint32_t shstrSize = 0;
 
@@ -434,8 +436,27 @@ ReadResult readElf(const std::string& path,
         sectionName[i]  = name;
         sectionClass[i] = classifyBySectionName(name);
         sectionType_[i] = be32(sh + OFF_SH_TYPE);
+        sectionFlags[i] = be32(sh + OFF_SH_FLAGS);
         sectionAddr[i]  = be32(sh + OFF_SH_ADDR);
         sectionSize[i]  = be32(sh + OFF_SH_SIZE);
+    }
+
+    // p_filesz can end before an aligned SHT_NOBITS section begins. Use
+    // allocated BSS section headers so the writer can preserve that gap.
+    uint32_t firstBss = UINT32_MAX;
+    uint32_t lastBss = 0;
+    for (uint16_t i = 0; i < e_shnum; ++i) {
+        if (sectionClass[i] != SecId::Bss ||
+            sectionType_[i] != SHT_NOBITS ||
+            (sectionFlags[i] & SHF_ALLOC) == 0 || sectionSize[i] == 0) {
+            continue;
+        }
+        firstBss = std::min(firstBss, sectionAddr[i]);
+        lastBss = std::max(lastBss, sectionAddr[i] + sectionSize[i]);
+    }
+    if (firstBss != UINT32_MAX) {
+        out.bssVA = firstBss;
+        out.bssSize = lastBss - firstBss;
     }
 
     // ---------- Combined-PT_LOAD split ----------
@@ -453,9 +474,7 @@ ReadResult readElf(const std::string& path,
     // boundary.  Recover it by finding the .data section (by name,
     // SHT_PROGBITS, non-zero size) whose linked VA falls inside
     // out.text's VA range, and splitting the byte vector at that
-    // offset.  bssVA / bssSize were already computed correctly from
-    // the PT_LOAD's (segMemsz - segFilesz) tail, so we leave them
-    // alone.
+    // offset. The allocated SHT_NOBITS span above supplies bssVA / bssSize.
     if (out.data.empty() && !out.text.empty()) {
         const uint32_t textEnd = out.textVA + uint32_t(out.text.size());
         for (uint16_t i = 0; i < e_shnum; ++i) {

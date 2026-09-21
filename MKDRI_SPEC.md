@@ -150,6 +150,9 @@ Giving `-r` with a COFF or DRI input is a hard error (exit 4).
   the CP/M-68K 8.3 convention.
 - Header magic: `EX_MAGIC` (`0x601A`, contiguous). Promoted to
   `EX_ABMAGIC` (`0x601B`) only when `-D` or `-B` is given.
+- For pass-through linked input, contiguous output zero-pads the preceding
+  segment through the next segment's declared virtual address. Alignment gaps
+  between text/data or data/BSS therefore remain part of the loaded layout.
 - `ch_rlbflg` in output: **`-1`** (relocation suppressed). The output is
   not further relocatable — it is an absolute image.
 - Stack size: `0` (let CP/M-68K's loader use the default), unless

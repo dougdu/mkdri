@@ -71,12 +71,40 @@ ReadResult writeDri(const std::string& outPath,
         return ReadResult::UnsupportedFeature;
     }
 
-    uint32_t textSize = roundUpEven(uint32_t(image.text.size()));
-    uint32_t dataSize = roundUpEven(uint32_t(image.data.size()));
-    uint32_t bssSize  = roundUpEven(image.bssSize);
+    std::vector<uint8_t> textBytes = image.text;
+    std::vector<uint8_t> dataBytes = image.data;
 
     // Decide on contiguous vs split layout.
     const bool splitLayout = opts.dataBase.has_value() || opts.bssBase.has_value();
+
+    // A contiguous DRI image has no address fields for ordinary 0x601A
+    // text/data/bss segments. Preserve pass-through ET_EXEC layout gaps by
+    // materializing them at the end of the preceding file-backed segment.
+    if (!splitLayout && !image.hasRelocs) {
+        uint32_t nextVA = textBase + roundUpEven(uint32_t(textBytes.size()));
+        if (image.dataVA != 0 && !dataBytes.empty()) {
+            if (image.dataVA < nextVA) {
+                diag = "ELF data VA " + hex(image.dataVA) +
+                       " overlaps text ending at " + hex(nextVA);
+                return ReadResult::UnsupportedFeature;
+            }
+            textBytes.resize(textBytes.size() + (image.dataVA - nextVA), 0);
+        }
+        nextVA = textBase + roundUpEven(uint32_t(textBytes.size())) +
+                 roundUpEven(uint32_t(dataBytes.size()));
+        if (image.bssVA != 0 && image.bssSize != 0) {
+            if (image.bssVA < nextVA) {
+                diag = "ELF bss VA " + hex(image.bssVA) +
+                       " overlaps data ending at " + hex(nextVA);
+                return ReadResult::UnsupportedFeature;
+            }
+            dataBytes.resize(dataBytes.size() + (image.bssVA - nextVA), 0);
+        }
+    }
+
+    uint32_t textSize = roundUpEven(uint32_t(textBytes.size()));
+    uint32_t dataSize = roundUpEven(uint32_t(dataBytes.size()));
+    uint32_t bssSize  = roundUpEven(image.bssSize);
 
     uint32_t dataBase = 0;
     uint32_t bssBase  = 0;
@@ -108,9 +136,6 @@ ReadResult writeDri(const std::string& outPath,
     }
 
     // --- Phase 4: apply per-segment bias to relocatable input --------
-    std::vector<uint8_t> textBytes = image.text;
-    std::vector<uint8_t> dataBytes = image.data;
-
     if (image.hasRelocs && !image.relocs.empty()) {
         const int64_t textBias = int64_t(textBase) - int64_t(image.textVA);
         const int64_t dataBias = int64_t(dataBase) - int64_t(image.dataVA);

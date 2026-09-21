@@ -31,7 +31,7 @@
 
 namespace {
 
-constexpr const char* MKDRI_VERSION = "1.3 (Phases 4–6 — ELF .REL → absolute/relocatable DRI + symbol map)";
+constexpr const char* MKDRI_VERSION = "1.3.1 (ELF/COFF/DRI to absolute/relocatable DRI + symbol map)";
 
 enum class InputFormat { Auto, Elf, Coff, Dri };
 

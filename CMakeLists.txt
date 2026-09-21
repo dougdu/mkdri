@@ -56,3 +56,22 @@ else()
 endif()
 
 target_link_libraries(mkdri PRIVATE alclib)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(mkdri-et-exec-gap-test
+        test/DriWriterGapTest.cpp
+        DriWriter.cpp
+        DriWriter.h
+        Image.h
+    )
+    target_include_directories(mkdri-et-exec-gap-test PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../Include
+    )
+    target_compile_definitions(mkdri-et-exec-gap-test PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    )
+    target_link_libraries(mkdri-et-exec-gap-test PRIVATE alclib)
+    add_test(NAME mkdri-et-exec-gap COMMAND mkdri-et-exec-gap-test)
+endif()
