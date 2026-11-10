@@ -11,8 +11,11 @@ Status: **Phases 1 + 2 + 3 + 4 + 5 + 6 implemented**.
   * Phase 5 (`-r` → DRI `.REL`): the output, when re-based by
     `reloc.exe`, is byte-identical to a direct Phase 4 conversion.
   * Phase 6 (`-y[<file>]`): optional symbol-map dump.
-Location of source: `c:\git\worm68k\68kTools\mkdri\`
-Location of this spec: `c:\git\worm68k\68kTools\mkdri\MKDRI_SPEC.md`
+Location of source: repository root.
+Location of this spec: [MKDRI_SPEC.md](MKDRI_SPEC.md).
+
+For the standalone build, see [README.md](README.md). References to other
+toolchain projects point to the original `worm68k` repository.
 
 ---
 
@@ -20,7 +23,7 @@ Location of this spec: `c:\git\worm68k\68kTools\mkdri\MKDRI_SPEC.md`
 
 CP/M-68K's CCP only loads files in the DRI/Alcyon **c.out** executable format
 (magic `0x601A` family — see
-[68kTools/asm68K/DRI_OBJECT_FORMAT.md](../asm68K/DRI_OBJECT_FORMAT.md)).
+[68kTools/asm68K/DRI_OBJECT_FORMAT.md](https://github.com/dougdu/worm68k/blob/main/68kTools/asm68K/DRI_OBJECT_FORMAT.md)).
 Today the `worm68k` workspace assembles and links most code with the modern
 toolchain that emits **ELF** (or, optionally, **COFF**). We can run those
 binaries directly under `sim68k` / `sid68k`, but they cannot be launched
@@ -258,7 +261,7 @@ A single writer, identical for all phases:
 4. **Apply relocations** to the in-memory text and data buffers
    (see § 5.4).
 5. Emit a 28- or 36-byte header per
-   [DRI_OBJECT_FORMAT.md § "File Header"](../asm68K/DRI_OBJECT_FORMAT.md):
+   [DRI_OBJECT_FORMAT.md § "File Header"](https://github.com/dougdu/worm68k/blob/main/68kTools/asm68K/DRI_OBJECT_FORMAT.md):
    - `ch_magic`        = `EX_MAGIC` or `EX_ABMAGIC`
    - `ch_tsize`        = `text.size` (rounded up to even, zero-padded)
    - `ch_dsize`        = `data.size` (rounded up to even, zero-padded)
@@ -455,7 +458,7 @@ Scope:
     | others | TBD                | error |
 
   (The exact constants live in
-  [68kTools/asm68K/coff/](../asm68K/coff/) — extract them from the
+  [68kTools/asm68K/coff/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/coff/) — extract them from the
   existing emitter rather than guessing.)
 
 Deliverable: `mkdri foo.coff` produces `foo.68K`.
@@ -471,7 +474,7 @@ Scope:
 
 - Detect magic `0x601A` (or `0x601B`).
 - Read header per
-  [DRI_OBJECT_FORMAT.md § "File Header"](../asm68K/DRI_OBJECT_FORMAT.md).
+  [DRI_OBJECT_FORMAT.md § "File Header"](https://github.com/dougdu/worm68k/blob/main/68kTools/asm68K/DRI_OBJECT_FORMAT.md).
 - Reject `ch_rlbflg != 0` (an already-stripped DRI file has no relocs,
   so there is nothing to do — print a polite "input is already
   absolute, nothing to relocate" and exit 0 with a no-op? **Decision:
@@ -481,7 +484,7 @@ Scope:
 - Read symbol table; reject any entry with `SYXR` (external reference)
   set and `SYDF` clear → unresolved external (exit 3).
 - Read text relocation bits + data relocation bits. Convert each per
-  [DRI_OBJECT_FORMAT.md § "Relocation Types"](../asm68K/DRI_OBJECT_FORMAT.md):
+  [DRI_OBJECT_FORMAT.md § "Relocation Types"](https://github.com/dougdu/worm68k/blob/main/68kTools/asm68K/DRI_OBJECT_FORMAT.md):
 
     | DRI type | name | maps to |
     |---|---|---|
@@ -633,29 +636,29 @@ this has caused hours of grief.
 ### 8.1 Language and toolchain
 
 - **C++17**, MSVC + clang-cl + g++ portable. Match the style of
-  [68kTools/asm68K/](../asm68K/) — that project is also C++17.
+  [68kTools/asm68K/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/) — that project is also C++17.
 - Use the existing **`alclib`** big-endian I/O helpers (`lgetw`,
   `lgetl`, `lputw`, `lputl` — see
-  `c:\git\worm68k\68kTools\alclib\libget.c` /
-  `c:\git\worm68k\68kTools\alclib\libput.c`) for DRI I/O.
+  [alclib/libget.c](alclib/libget.c) /
+  [alclib/libput.c](alclib/libput.c)) for DRI I/O.
 - Use the existing **`DRIFilehdr.h`**, **`DRISymbol.h`**, etc. from
-  [68kTools/asm68K/](../asm68K/) for header structures; do NOT
+  [68kTools/asm68K/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/) for header structures; do NOT
   redefine them locally.
 - No third-party ELF/COFF library — write the parsers in ~300 lines
   each, against the LSB / `coff.h` documentation that already lives
-  in [68kTools/asm68K/elf/](../asm68K/elf/) and
-  [68kTools/asm68K/coff/](../asm68K/coff/). The emitters in those
+  in [68kTools/asm68K/elf/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/elf/) and
+  [68kTools/asm68K/coff/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/coff/). The emitters in those
   folders are direct documentation of the on-disk layout.
-- CMake target named `mkdri`, integrated with the existing
-  [68kTools/CMakeLists.txt](../CMakeLists.txt) `add_subdirectory`
-  list.
+- CMake target named `mkdri`, built by the standalone
+  [CMakeLists.txt](CMakeLists.txt) with the bundled `alclib` dependency.
 
 ### 8.2 Project structure
 
 ```
-c:\git\worm68k\68kTools\mkdri\
+c:\git\mkdri\
     CMakeLists.txt
-    mkdri.vcxproj                  (generated by CMake on Windows)
+    alclib\                        bundled DRI I/O library
+    Include\                       shared alclib headers
     main.cpp                       CLI parsing, format dispatch
     Image.h                        canonical internal representation
     ElfReader.cpp / .h             phase 1
@@ -688,7 +691,7 @@ c:\git\worm68k\68kTools\mkdri\
 ### 8.4 Style hooks for the BAS68K pipeline
 
 The eventual makefile target in
-[68kTools/bas68k/samples/](../bas68k/samples/) becomes:
+[68kTools/bas68k/samples/](https://github.com/dougdu/worm68k/tree/main/68kTools/bas68k/samples/) becomes:
 
 ```makefile
 %.68K: %.elf

@@ -3,14 +3,18 @@
 Date: 2026-06-12
 Author: GitHub Copilot (for review)
 Status: **Draft** — no native code landed yet.
+
+The standalone host build is described in [README.md](../README.md).
+Other toolchain references below remain in the `worm68k` repository.
+
 Companion documents:
 * [MKDRI_NATIVE_DESIGN.md](MKDRI_NATIVE_DESIGN.md) — technical design.
 * [../MKDRI_SPEC.md](../MKDRI_SPEC.md) — the parent (host) spec that the
   native port reproduces semantically.
-* [../../reloc/reloc.c](../../reloc/reloc.c) — the historical DRI
+* [reloc/reloc.c](https://github.com/dougdu/worm68k/blob/main/68kTools/reloc/reloc.c) — the historical DRI
   `reloc` source (already Win64-buildable), which the Phase N1 drop
   strictly supersedes.
-* [../../../cpm68k/src/v102a/](../../../cpm68k/src/v102a/) — the
+* [cpm68k/src/v102a/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/) — the
   **Alcyon 4.3 (January 1984)** source kit (`cp68` / `c068` / `c168`
   / `cc` / `as68` / `lo68` / `clib` / `libe` / `libf` / `cutils` /
   `util`), the supply source for the Win64 toolchain port described
@@ -64,7 +68,7 @@ nmake-style makefile that drives the in-tree `c68` / `as68` / `lo68`
 A standalone "DRI-era C" cross-toolchain on Windows, made from the
 complete **Alcyon 4.3 (January 1984)** source distribution already
 sitting in-tree at
-[cpm68k/src/v102a/](../../../cpm68k/src/v102a/):
+[cpm68k/src/v102a/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/):
 
 ```
 cpm68k/src/v102a/
@@ -98,7 +102,7 @@ cpm68k/src/v102a/
     doc/          compiler manual
 ```
 
-Per the v102a [`readme`](../../../cpm68k/src/v102a/readme):
+Per the v102a [`readme`](https://github.com/dougdu/worm68k/blob/main/cpm68k/src/v102a/readme):
 
 > ALCYON Compiler/Assembler/Loader — version 4.3 — January 1984
 > […]
@@ -127,12 +131,12 @@ fixes:
 
 | Tool | In-tree location | Original source |
 |---|---|---|
-| `as68` | [68kTools/as68/](../../as68/) | Alcyon `as.c` family, ©1981–1983 |
-| `lo68` | [68kTools/lo68/](../../lo68/) | Alcyon `lo68/main.c` ©1982–1983 |
-| `link68` | [68kTools/link68/](../../link68/) | DRI `link68.c` ©1983 |
-| `reloc` | [68kTools/reloc/](../../reloc/) | DRI `reloc.c` |
-| `ar68`, `nm68`, `size68` | [68kTools/ar68/](../../ar68/) etc. | Alcyon `util/` |
-| `alclib` (libget/libput/getchd/putchd) | [68kTools/alclib/](../../alclib/) | Alcyon `clib/` subset |
+| `as68` | [68kTools/as68/](https://github.com/dougdu/worm68k/tree/main/68kTools/as68/) | Alcyon `as.c` family, ©1981–1983 |
+| `lo68` | [68kTools/lo68/](https://github.com/dougdu/worm68k/tree/main/68kTools/lo68/) | Alcyon `lo68/main.c` ©1982–1983 |
+| `link68` | [68kTools/link68/](https://github.com/dougdu/worm68k/tree/main/68kTools/link68/) | DRI `link68.c` ©1983 |
+| `reloc` | [68kTools/reloc/](https://github.com/dougdu/worm68k/tree/main/68kTools/reloc/) | DRI `reloc.c` |
+| `ar68`, `nm68`, `size68` | [68kTools/ar68/](https://github.com/dougdu/worm68k/tree/main/68kTools/ar68/) etc. | Alcyon `util/` |
+| `alclib` (libget/libput/getchd/putchd) | [alclib/](../alclib/) | Alcyon `clib/` subset |
 
 The same recipe applies to the four remaining Alcyon C-compiler
 pieces (`cp68`, `c068`, `c168`, `c68` driver).  Once they exist as
@@ -143,7 +147,7 @@ same dialect (K&R, with `#define DRI` quirks) that the original
 `MKDRI.C` will be authored in.  The Win64 `c68.exe` driver chains
 them together exactly the way the v102a driver does on a VAX.
 
-For the full port plan, see [../../c68/PORT_PLAN.md](../../c68/PORT_PLAN.md).
+For the full port plan, see [c68/PORT_PLAN.md](https://github.com/dougdu/worm68k/blob/main/68kTools/c68/PORT_PLAN.md).
 
 That toolchain stays in worm68k tree (no msys2, no winget, no
 external prerequisite) and unblocks every future "we want this C
@@ -155,7 +159,7 @@ Two artefacts ship from a single source tree:
 
 1. **Win64 cross-compiler**: `c68.exe`, `cp68.exe`, `c068.exe`,
    `c168.exe`, plus `as68_43.exe` / `lo68_43.exe` (per the
-   [c68 PORT_PLAN §4.3](../../c68/PORT_PLAN.md) naming scheme; the
+   [c68 PORT_PLAN §4.3](https://github.com/dougdu/worm68k/blob/main/68kTools/c68/PORT_PLAN.md) naming scheme; the
    `_43` suffix avoids collision with the already-shipped
    `as68.exe` / `lo68.exe`).  `nuxi_43.exe` is also new (no
    in-tree equivalent).  The remaining utility binaries
@@ -606,7 +610,7 @@ The native port is **done** when all of the following are true:
 
 1. T1–T4 have shipped: a Win64 `c68.exe` + `as68_43.exe` +
    `lo68_43.exe` chain exists in-tree with passing Alcyon `test/`
-   regressions.  See [../../c68/PORT_PLAN.md](../../c68/PORT_PLAN.md)
+   regressions.  See [c68/PORT_PLAN.md](https://github.com/dougdu/worm68k/blob/main/68kTools/c68/PORT_PLAN.md)
    for the standalone port plan.
 2. N0–N5 have shipped (all `G*` goals satisfied).
 3. `cpm68k/src/v1.3` and `cpm68k/src/v1.2` build under the on-target

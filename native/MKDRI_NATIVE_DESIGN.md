@@ -3,13 +3,17 @@
 Date: 2026-06-12
 Author: GitHub Copilot (for review)
 Status: **Draft** — implementation has not started.
+
+The standalone host build is described in [README.md](../README.md).
+Other toolchain references below remain in the `worm68k` repository.
+
 Companion documents:
 * [MKDRI_NATIVE_PLAN.md](MKDRI_NATIVE_PLAN.md) — phasing and acceptance.
 * [../MKDRI_SPEC.md](../MKDRI_SPEC.md) — the parent (host) specification.
-* [../../reloc/reloc.c](../../reloc/reloc.c) — historical reference port.
-* [../../asm68K/DRI_OBJECT_FORMAT.md](../../asm68K/DRI_OBJECT_FORMAT.md)
+* [reloc/reloc.c](https://github.com/dougdu/worm68k/blob/main/68kTools/reloc/reloc.c) — historical reference port.
+* [asm68K/DRI_OBJECT_FORMAT.md](https://github.com/dougdu/worm68k/blob/main/68kTools/asm68K/DRI_OBJECT_FORMAT.md)
   — DRI `c.out` on-disk layout.
-* [../../bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md](../../bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md)
+* [bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md](https://github.com/dougdu/worm68k/blob/main/68kTools/bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md)
   — exhaustive CP/M-68K BDOS reference and call conventions; this
   port follows the same conventions.
 
@@ -82,14 +86,14 @@ v1.03 Alcyon compiler chain.  Crucially, the worm68k tree carries
 
   | Tool | In-tree source | Origin |
   |---|---|---|
-  | `cp68.exe` | `68kTools/c68/cp68/` | port of [cpm68k/src/v102a/cp68/](../../../cpm68k/src/v102a/cp68/) |
-  | `c068.exe` | `68kTools/c68/c068/` | port of [cpm68k/src/v102a/c068/](../../../cpm68k/src/v102a/c068/) |
-  | `c168.exe` | `68kTools/c68/c168/` | port of [cpm68k/src/v102a/c168/](../../../cpm68k/src/v102a/c168/) |
-  | `c68.exe` (driver) | `68kTools/c68/cc/` | port of [cpm68k/src/v102a/cc/](../../../cpm68k/src/v102a/cc/) |
-  | `as68_43.exe` | `68kTools/c68/as68/` | port of [cpm68k/src/v102a/as68/](../../../cpm68k/src/v102a/as68/) (suffix avoids collision with the existing [../../as68/](../../as68/) C++ port) |
-  | `lo68_43.exe` | `68kTools/c68/lo68/` | port of [cpm68k/src/v102a/lo68/](../../../cpm68k/src/v102a/lo68/) (suffix avoids collision with [../../lo68/](../../lo68/)) |
-  | `reloc.exe` | [../../reloc/](../../reloc/) | already shipped (used by both the existing `bas68k`/`tbasic` chain and by the new c68 driver — the c68/lo68/reloc.c is an older 1981 baseline that we do **not** build) |
-  | `clib.a` | `68kTools/c68/clib/` | port of [cpm68k/src/v102a/clib/](../../../cpm68k/src/v102a/clib/) |
+  | `cp68.exe` | `68kTools/c68/cp68/` | port of [cpm68k/src/v102a/cp68/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/cp68/) |
+  | `c068.exe` | `68kTools/c68/c068/` | port of [cpm68k/src/v102a/c068/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/c068/) |
+  | `c168.exe` | `68kTools/c68/c168/` | port of [cpm68k/src/v102a/c168/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/c168/) |
+  | `c68.exe` (driver) | `68kTools/c68/cc/` | port of [cpm68k/src/v102a/cc/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/cc/) |
+  | `as68_43.exe` | `68kTools/c68/as68/` | port of [cpm68k/src/v102a/as68/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/as68/) (suffix avoids collision with the existing [as68/](https://github.com/dougdu/worm68k/tree/main/68kTools/as68/) C++ port) |
+  | `lo68_43.exe` | `68kTools/c68/lo68/` | port of [cpm68k/src/v102a/lo68/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/lo68/) (suffix avoids collision with [lo68/](https://github.com/dougdu/worm68k/tree/main/68kTools/lo68/)) |
+  | `reloc.exe` | [reloc/](https://github.com/dougdu/worm68k/tree/main/68kTools/reloc/) | already shipped (used by both the existing `bas68k`/`tbasic` chain and by the new c68 driver — the c68/lo68/reloc.c is an older 1981 baseline that we do **not** build) |
+  | `clib.a` | `68kTools/c68/clib/` | port of [cpm68k/src/v102a/clib/](https://github.com/dougdu/worm68k/tree/main/cpm68k/src/v102a/clib/) |
 
   These produce DRI 0x601A object files indistinguishable from those
   built on-target by the historical `cp68`/`c068`/`c168`/`as68`/`lo68`
@@ -108,14 +112,14 @@ v1.03 Alcyon compiler chain.  Crucially, the worm68k tree carries
 ### 1.3 Run-time conventions
 
 * **Entry frame** as documented in
-  [../../sid68k/SID68K_PGMLOAD_ENTRY_FRAME_DESIGN.md](../../sid68k/SID68K_PGMLOAD_ENTRY_FRAME_DESIGN.md)
+  [sid68k/SID68K_PGMLOAD_ENTRY_FRAME_DESIGN.md](https://github.com/dougdu/worm68k/blob/main/68kTools/sid68k/SID68K_PGMLOAD_ENTRY_FRAME_DESIGN.md)
   and `cpm68k/Documents/CPM-68K_Programmers_Guide_Jun83.txt §4.1`:
   the CCP loads the image, sets USP = hightpa, pushes the base-page
   pointer, and `jsr`s to `ch_entry`.  The C startup (from `CLIB`)
   consumes the base page, sets up `argc` / `argv` from `cmdtail`,
   installs `_exit` via BDOS 0, and calls `main()`.
 * **BDOS calls** via `trap #2`, with the convention summarized in
-  [../../bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md §3.1](../../bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md).
+  [bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md §3.1](https://github.com/dougdu/worm68k/blob/main/68kTools/bas68k/basrtm-cpm/BASRTM_CPM_PLAN.md).
   Caller-save: D0, D1, D2, A0, A1.  Callee-save: D3-D7, A2-A6.
   See user memory `m68k-cabi-clobbers.md` for the painful empirical
   details.
@@ -320,7 +324,7 @@ MKDRI [-bHEX] [-O OUTPUT] [-F AUTO|ELF|COFF|DRI] [-DHEX] [-BHEX]
 A straight port of `mkdri/main.cpp`'s `parseCli()` (linear scan over
 `argv`).  No `getopt` — `c68` doesn't bundle it and the option set
 is small.  `parseHex()` is a verbatim port of `reloc.c`'s `decode()`
-(see [../../reloc/reloc.c lines 196–250](../../reloc/reloc.c)).
+(see [reloc/reloc.c lines 196–250](https://github.com/dougdu/worm68k/blob/main/68kTools/reloc/reloc.c)).
 
 ### 4.4 Exit codes
 
@@ -638,7 +642,7 @@ int read_dri(path, opts)
 ```
 
 The reloc-apply loop is literally identical to `reloc.c`'s
-`reloc()` function (see [../../reloc/reloc.c lines 282–360](../../reloc/reloc.c))
+`reloc()` function (see [reloc/reloc.c lines 282–360](https://github.com/dougdu/worm68k/blob/main/68kTools/reloc/reloc.c))
 modulo the rename to `cpm_lgetw` / `cpm_lputw`.
 
 `dri_writer.c` ports `mkdri/DriWriter.cpp` minus the Phase 4 reloc-
@@ -662,7 +666,7 @@ identical.
 5. Reads each section's relocation list (per-section offset is in
    the section header).  Maps the COFF reloc types per the table in
    [../MKDRI_SPEC.md §6 "Phase 2"](../MKDRI_SPEC.md) and the constants
-   in [../../asm68K/coff/](../../asm68K/coff/).
+   in [asm68K/coff/](https://github.com/dougdu/worm68k/tree/main/68kTools/asm68K/coff/).
 
 Stream-processing: relocations are applied directly into
 `g_image.text` / `g_image.data` as they are read, *not* materialized

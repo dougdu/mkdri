@@ -1,7 +1,10 @@
-# mkdri — ELF/COFF/DRI to absolute DRI converter
-#
-# Phase 1 lands the ELF reader plus the DRI writer plus the CLI driver.
-# COFF and DRI reader inputs are stubbed for Phase 2 / Phase 3.
+cmake_minimum_required(VERSION 3.16)
+project(mkdri LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_subdirectory(alclib)
 
 set(MKDRI_SOURCES
     main.cpp
@@ -23,21 +26,10 @@ set(MKDRI_HEADERS
     SymFile.h
 )
 
-# When this file is used stand-alone (not included from the parent CMakeLists.txt)
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    cmake_minimum_required(VERSION 3.16)
-    project(mkdri CXX)
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    add_subdirectory(../alclib alclib)
-endif()
-
 add_executable(mkdri ${MKDRI_SOURCES} ${MKDRI_HEADERS})
 
 target_include_directories(mkdri PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../asm68K
 )
 
 target_compile_definitions(mkdri PRIVATE
@@ -67,7 +59,6 @@ if(BUILD_TESTING)
     )
     target_include_directories(mkdri-et-exec-gap-test PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../Include
     )
     target_compile_definitions(mkdri-et-exec-gap-test PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
